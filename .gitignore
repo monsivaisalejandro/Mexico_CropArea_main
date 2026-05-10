@@ -1,1 +1,7 @@
 AncillaryData/INEGI/DatosBase/*
+__pycache__/
+*.pyc
+input/
+output/
+gemini/
+.ipynb_checkpoints/
