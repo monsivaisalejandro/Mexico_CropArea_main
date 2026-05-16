@@ -1,4 +1,4 @@
-name: s1_env
+name: python
 channels:
   - conda-forge
   - defaults

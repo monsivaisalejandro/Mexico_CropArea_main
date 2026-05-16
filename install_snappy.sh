@@ -6,21 +6,27 @@ REAL_USER=${SUDO_USER:-$(whoami)}
 REAL_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
 SNAP_DEST="/opt/snap"
 
-# Get current Conda environment paths
-CONDA_PYTHON=$(which python)
-CONDA_SITE=$(python -c "import site; print(site.getsitepackages()[0])")
+# Allow overriding paths via arguments
+CONDA_PYTHON=${1:-$(which python)}
+CONDA_SITE=${2:-$(python -c "import site; print(site.getsitepackages()[0])")}
+
+echo "Using Python: $CONDA_PYTHON"
+echo "Using Site-packages: $CONDA_SITE"
 
 echo "### 1. System Dependencies ###"
+# Use -y and non-interactive frontend to prevent hanging during DPS build
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y wget curl unzip libgfortran5 libgomp1 default-jdk \
     python3 python3-pip python3-dev build-essential libgdal-dev
 
 echo "### 2. Installing SNAP 13 ###"
 if [ ! -f "esa-snap_all_linux-13.0.0.sh" ]; then
-    wget https://download.esa.int/step/snap/13.0/installers/esa-snap_all_linux-13.0.0.sh
+    wget -q https://download.esa.int/step/snap/13.0/installers/esa-snap_all_linux-13.0.0.sh
 fi
 chmod +x esa-snap_all_linux-13.0.0.sh
-./esa-snap_all_linux-13.0.0.sh -q -dir "$SNAP_DEST"
+# Added -c to the installer to ensure it doesn't try to open a GUI or ask questions
+./esa-snap_all_linux-13.0.0.sh -q -dir "$SNAP_DEST" -c
 rm esa-snap_all_linux-13.0.0.sh
 chown -R $REAL_USER:$REAL_USER "$SNAP_DEST"
 
