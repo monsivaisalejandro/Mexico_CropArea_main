@@ -4,6 +4,14 @@ from esa_snappy import ProductIO, PixelPos
 from shapely.wkt import loads as load_wkt
 from shapely.geometry import Polygon
 
+# Optional import of geombox
+try:
+    import geombox
+    GEOMBOX_AVAILABLE = True
+except ImportError:
+    GEOMBOX_AVAILABLE = False
+
+
 
 def load_product_from_path(product_path):
     """Load Sentinel-1 product from file path."""
@@ -45,7 +53,12 @@ def validate_roi_intersection(product, wkt_roi):
 
     try:
         product_poly = Polygon(product_coords)
-        roi_poly = load_wkt(wkt_roi)
+        if GEOMBOX_AVAILABLE:
+            print("💡 Geombox package detected! Parsing ROI input using unified parser...")
+            roi_poly = geombox.get_geometry(wkt_roi, target_crs="EPSG:4326")
+        else:
+            print("⚠️ Geombox not available. Parsing input as raw WKT...")
+            roi_poly = load_wkt(wkt_roi)
         
         if product_poly.intersects(roi_poly):
             intersection_area = product_poly.intersection(roi_poly).area

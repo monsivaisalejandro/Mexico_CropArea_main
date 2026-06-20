@@ -34,8 +34,17 @@ def process(product_path: str, wkt_roi: str, output_path: str):
         filtered = apply_speckle_filter(calibrated)
         print("Applying terrain correction...")
         terrain_corrected = terrain_correct(filtered, pixel_spacing=100.0)
+
+        # Resolve subset ROI WKT
+        try:
+            import geombox
+            print("Extracting subset WKT from geombox...")
+            resolved_roi_wkt = geombox.get_geometry(wkt_roi, target_crs="EPSG:4326").wkt
+        except ImportError:
+            resolved_roi_wkt = wkt_roi
+
         print("Subsetting product...")
-        subset_result = subset_product(terrain_corrected, wkt_roi)
+        subset_result = subset_product(terrain_corrected, resolved_roi_wkt)
         print("Converting to dB...")
         final_product = convert_to_db(subset_result)
 
