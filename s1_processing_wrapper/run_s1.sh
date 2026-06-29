@@ -6,6 +6,7 @@ rootdir=$(dirname "$basedir")
 
 # ✅ DPS runs from the job working dir, input/ is relative to that
 WORKING_DIR=$(pwd)
+mkdir -p "${WORKING_DIR}/output/"
 INPUT_DIR="${WORKING_DIR}/input"
 
 echo "Working dir: $WORKING_DIR"

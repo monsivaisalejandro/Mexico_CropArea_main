@@ -16,15 +16,3 @@ ENV_SITE=$(conda run --name python python -c "import site; print(site.getsitepac
 
 # Install SNAP and configure the esa_snappy bridge for the 'python' environment
 bash ${rootdir}/install_snappy.sh "$ENV_PYTHON" "$ENV_SITE"
-
-# Build and install geombox wheel into the conda environment
-if [ -d "${rootdir}/geombox" ]; then
-    echo "Building geombox wheel..."
-    mkdir -p "${rootdir}/geombox/dist"
-    conda run --name python pip wheel --no-deps -w "${rootdir}/geombox/dist" "${rootdir}/geombox"
-    
-    echo "Installing geombox wheel..."
-    conda run --name python pip install --force-reinstall "${rootdir}/geombox/dist"/geombox-*.whl
-else
-    echo "⚠️ geombox directory not found at ${rootdir}/geombox"
-fi

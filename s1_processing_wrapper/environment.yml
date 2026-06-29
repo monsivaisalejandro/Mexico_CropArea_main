@@ -9,3 +9,5 @@ dependencies:
   - shapely
   - pip
   - wheel
+  - pip:
+    - geombox

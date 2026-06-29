@@ -2,6 +2,7 @@ import sys
 import argparse
 import subprocess
 from typing import Any
+import os
 
 from Sentinel1_processing.product_loader import load_product_from_path, validate_roi_intersection
 from Sentinel1_processing.preprocessing import apply_orbit_file, remove_thermal_noise, calibrate_product
@@ -50,6 +51,7 @@ def process(product_path: str, wkt_roi: str, output_path: str):
 
         # Save result
         print(f"Writing output to {output_path}")
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
         ProductIO.writeProduct(final_product, output_path, 'GeoTIFF-BigTIFF')
         print(f"Processing complete: {output_path}")
 
