@@ -40,6 +40,7 @@ echo "Output name: $output_name"
 
 output_dir=$(readlink -f output)
 
+export PYTHONPATH="$(dirname "$basedir"):${PYTHONPATH:-}"
 conda run --live-stream --name python python ${basedir}/process_sentinel1.py \
     --product_path "$input_product" \
     --wkt_roi "$wkt_roi" \
