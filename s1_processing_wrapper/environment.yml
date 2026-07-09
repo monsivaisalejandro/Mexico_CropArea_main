@@ -7,3 +7,7 @@ dependencies:
   - numpy
   - gdal
   - shapely
+  - pip
+  - wheel
+  - pip:
+    - geombox

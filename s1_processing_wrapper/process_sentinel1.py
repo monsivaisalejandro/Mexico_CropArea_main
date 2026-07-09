@@ -2,6 +2,7 @@ import sys
 import argparse
 import subprocess
 from typing import Any
+import os
 
 from Sentinel1_processing.product_loader import load_product_from_path, validate_roi_intersection
 from Sentinel1_processing.preprocessing import apply_orbit_file, remove_thermal_noise, calibrate_product
@@ -10,6 +11,11 @@ from esa_snappy import ProductIO
 
 def process(product_path: str, wkt_roi: str, output_path: str):
     try:
+        # Debug working directory
+        print(f"Current working directory: {os.getcwd()}")
+        print(f"Output path provided: {output_path}")
+        print(f"Absolute output path: {os.path.abspath(output_path)}")
+        
         # Load and validate product
         print(f"Loading product from {product_path}")
         product = load_product_from_path(product_path)
@@ -34,14 +40,26 @@ def process(product_path: str, wkt_roi: str, output_path: str):
         filtered = apply_speckle_filter(calibrated)
         print("Applying terrain correction...")
         terrain_corrected = terrain_correct(filtered, pixel_spacing=100.0)
+
+        # Resolve subset ROI WKT
+        try:
+            import geombox
+            print("Extracting subset WKT from geombox...")
+            resolved_roi_wkt = geombox.get_geometry(wkt_roi, target_crs="EPSG:4326").wkt
+        except ImportError:
+            resolved_roi_wkt = wkt_roi
+
         print("Subsetting product...")
-        subset_result = subset_product(terrain_corrected, wkt_roi)
+        subset_result = subset_product(terrain_corrected, resolved_roi_wkt)
         print("Converting to dB...")
         final_product = convert_to_db(subset_result)
 
         # Save result
-        print(f"Writing output to {output_path}")
-        ProductIO.writeProduct(final_product, output_path, 'GeoTIFF-BigTIFF')
+        # Convert to absolute path to avoid working directory issues
+        abs_output_path = os.path.abspath(output_path)
+        print(f"Writing output to {abs_output_path}")
+        os.makedirs(os.path.dirname(abs_output_path), exist_ok=True)
+        ProductIO.writeProduct(final_product, abs_output_path, 'GeoTIFF-BigTIFF')
         print(f"Processing complete: {output_path}")
 
         # Clean up memory

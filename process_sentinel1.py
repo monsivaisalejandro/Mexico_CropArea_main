@@ -39,7 +39,16 @@ def process_sentinel1_product(product_path, wkt_roi, output_path, pixel_spacing=
         
         # Geometric processing
         terrain_corrected = terrain_correct(filtered, pixel_spacing)
-        subset_result = subset_product(terrain_corrected, wkt_roi)
+        
+        # Resolve subset ROI WKT
+        try:
+            import geombox
+            print("Extracting subset WKT from geombox...")
+            resolved_roi_wkt = geombox.get_geometry(wkt_roi, target_crs="EPSG:4326").wkt
+        except ImportError:
+            resolved_roi_wkt = wkt_roi
+
+        subset_result = subset_product(terrain_corrected, resolved_roi_wkt)
         final_product = convert_to_db(subset_result)
         
         # Save result
